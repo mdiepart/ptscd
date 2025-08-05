@@ -1,0 +1,3 @@
+[submodule "sim/littlefs"]
+	path = sim/littlefs
+	url = https://github.com/littlefs-project/littlefs
