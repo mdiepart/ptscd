@@ -93,18 +93,17 @@ The content of the blob file is defined as follows:
     blob contains the list of channels in the group. Bounded to 32 (or so) channels
 
 ### contacts
-CS () | .. | ... | BLOB_ID
 
-### Users
-Name | Settings (radio related?)
+CS () | .. | ... | BLOB_ID
 
 
 ### Blobs
+
 BLOB_ID (2 bytes) | BLOB_SIZE (1 byte) | BLOB_DATA (var length)
 
 
 FM :
-    QA Params: Squelch (1 byte) | power (1 byte) | CTCSS code (6 bits) | CTCSS op (E+/D) (2 bits)
+    QA Params: CTCSS RX code (6 bits) | CTCSS TX Code (6 bits)
     Blob: Name
 
 M17 :
@@ -130,5 +129,10 @@ CS-7000 Plus
 32 MB
 
 
-What needs to be done?
-Understand how DMR codeplugs work? Have an idea of what is stored in a typical DMR contact
+## What needs to be done?
+
+* Understand how DMR codeplugs work? Have an idea of what is stored in a typical DMR contact
+* Define the values to use for Squelch, power, ...
+* Does BCFM need to be split in EU/US BCFM?
+* Another way to handle modes would be to have a mode and submode field so that FM bandwidth / modulation factors can be classified as submodes of FM, it also make it easier to add subtly different modes like Reverse RTTY, reverse CW, or (let's be crazy) Codec2 Over DStar. The common denominator for mode would be that they use the same QA params and blob content. Otherwise it is another mode.
+* Define content of contact entry
