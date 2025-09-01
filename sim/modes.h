@@ -32,5 +32,4 @@ typedef enum
 } PTSCD_Modes_e;
 
 
-
 #endif /* __MODES_H__ */

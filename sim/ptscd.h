@@ -2,7 +2,11 @@
 #define __PTSCD_H__
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include <errno.h>
+
+#include "littlefs/lfs.h"
 
 #include "modes.h"
 
@@ -18,8 +22,7 @@ typedef struct __attribute__((packed))
     uint32_t first_empty_blob_address;
 
     uint16_t first_empty_channel_id;
-    uint16_t first_empty_contact_id;
-
+    uint16_t first_empty_contact_id;        
 } ptscd_context_t;
 
 /**
@@ -27,52 +30,80 @@ typedef struct __attribute__((packed))
  */
 typedef struct __attribute__((packed))
 {
-    uint16_t id;        /** ID of the channel */
-    uint32_t freq_rx;   /** RX frequency of the channel */
-    uint32_t freq_tx;   /** TX frequency of the channel */
-    uint8_t squelch;    /** Squelch level */
-    uint8_t power;      /** TX power */
-    uint8_t mode;       /** Mode to use for this channel */
-    uint16_t qa_params; /** Quick Access parameters, mode dependant */
-    uint16_t blob_id;   /** Optional: ID of the blob containing additional mode data (NULL if unused) */
+    uint16_t id;        /**< ID of the channel */
+    uint32_t freq_rx;   /**< RX frequency of the channel */
+    uint32_t freq_tx;   /**< TX frequency of the channel */
+    uint8_t squelch;    /**< Squelch level */
+    uint8_t power;      /**< TX power */
+    uint8_t mode;       /**< Mode to use for this channel */
+    uint16_t qa_params; /**< Quick Access parameters, mode dependant */
+    uint16_t blob_id;   /**< Optional: ID of the blob containing additional mode data (NULL if unused) */
 } ptscd_channel_t;
 
-typedef struct {
-    uint16_t id;        /** ID of the group */
-    uint16_t blob_id;   /** ID of the blob containing the IDs of the channels making the group */
+/**
+ * Structure representing a group of channels
+ */
+typedef struct __attribute__((packed))
+{
+    uint16_t id;        /**< ID of the group */
+    uint16_t blob_id;   /**< ID of the blob containing the IDs of the channels making the group */
 } ptscd_group_t;
 
-typedef struct
+/**
+ * Structure representing a PTSCD blob.
+ */
+typedef struct __attribute__((packed))
 {
-    union
-    {
-        struct __attribute__((packed)) fm
-        {
-            uint16_t ctcss_rx:6; /** FM CTCSS code to open the squelch (0 if disabled) */
-            uint16_t ctcss_tx:6; /** FM CTCSS code during TX (0 if disabled) */
-            uint16_t null:4;
-        };
+    uint16_t id;        /**< ID of the blob */
+    uint8_t length;     /**< Data length (not including id and length byte itself) */
+    uint8_t *data;      /**< Data contained in the blob */
+} ptscd_blob_t;
 
-        struct __attribute__((packed)) m17
-        {
-            uint16_t can:3; /** M17 Channel access number */
-        };
-    };
-
-} ptscd_qa_t;
-
-typedef struct
+/**
+ * Structure containing the handle to a PTSCD codeplug
+ */
+typedef struct __attribute__((packed))
 {
-    uint8_t dst[6]; /** M17 encoded callsign */
-    uint8_t module;
-} ptscd_blob_m17_t;
+    ptscd_context_t *ctx;
+    lfs_t *lfs;
+    lfs_file_t *ptscd_dat;
+    lfs_file_t *channels_dat;
+    lfs_file_t *groups_dat;
+    lfs_file_t *contacts_dat;
+} ptscd_t;
 
-typedef struct
-{
-    uint32_t dmr_id:24;
-    uint32_t reserved:8;
-    uint8_t reserved[10];
+/**
+ * Initializes a PTSCD codeplug handle
+ * 
+ * @param *ptscd pointer to a PTSCD handle
+ * 
+ * @return 
+ */
+ptscd_t *ptscd_init(lfs_t *lfs);
 
-} ptscd_blob_dmr_t;
+/**
+ * Destroy a PTSCD handle, freeing all internal resources
+ */
+void ptscd_destroy(ptscd_t *ptscd);
+
+/**
+ * Opens a PTSCD codeplug
+ * 
+ * @param *ptscd initialized PTSCD handle
+ * 
+ * @return 
+ */
+int ptscd_open(ptscd_t *ptscd, const ptscd_context_t *context);
+
+void ptscd_close(ptscd_t *ptscd);
+
+/**
+ * Return the number of channels contained in a PTSCD codeplug
+ */
+int ptscd_get_channel_count(const ptscd_t *ptscd);
+
+int ptscd_get_channel(const ptscd_t *ptscd, const uint16_t id, ptscd_channel_t *channel);
+int ptscd_del_channel(ptscd_t *ptscd, const uint16_t id);
+int ptscd_add_channel(ptscd_t *ptscd, const ptscd_channel_t *channel);
 
 #endif /* __PTSCD_H__ */

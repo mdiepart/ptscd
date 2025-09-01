@@ -3,11 +3,13 @@
 
 #include "littlefs/lfs.h"
 #include "littlefs/bd/lfs_emubd.h"
+#include "ptscd.h"
 
 int main(int argc, char *argv[])
 {
 	lfs_t lfs;
 	lfs_emubd_t bd;
+	lfs_file_t lfs_file;
 
 	const struct lfs_config cfg = 
 	{
@@ -59,6 +61,45 @@ int main(int argc, char *argv[])
 		return err;
 	}
 	printf("Mounted block device\r\n");
+
+	// Create minimal set of files and headers
+	printf("Created \"ptscd.dat\".\r\n");
+	lfs_file_open(&lfs, &lfs_file, "ptscd.dat", LFS_O_CREAT | LFS_O_RDWR);
+	char str[] = "PTSCD 0.1p1\nchannels.dat\ncontacts.dat\ngroups.dat\n";
+	lfs_file_write(&lfs, &lfs_file, str, sizeof(str)-1);
+	lfs_file_close(&lfs, &lfs_file);
+	printf("Closed \"ptscd.dat\".\r\n");
+
+	printf("Created \"channels.dat\".\r\n");
+	lfs_file_open(&lfs, &lfs_file, "channels.dat", LFS_O_CREAT | LFS_O_RDWR);
+	lfs_file_close(&lfs, &lfs_file);
+	printf("Closed \"channels.dat\".\r\n");
+
+	printf("Created \"contacts.dat\".\r\n");
+	lfs_file_open(&lfs, &lfs_file, "contacts.dat", LFS_O_CREAT | LFS_O_RDWR);
+	lfs_file_close(&lfs, &lfs_file);
+	printf("Closed \"contacts.dat\".\r\n");
+
+	printf("Created \"groups.dat\".\r\n");
+	lfs_file_open(&lfs, &lfs_file, "groups.dat", LFS_O_CREAT | LFS_O_RDWR);
+	lfs_file_close(&lfs, &lfs_file);
+	printf("Closed \"groups.dat\".\r\n");
+
+
+	ptscd_t *cps = ptscd_init(&lfs);
+	if(cps == NULL)
+	{
+		printf("ptscd_init() returned NULL.\r\n");
+	}
+	else 
+	{
+		printf("Initialized PTSCD\r\n");
+		err = ptscd_open(cps, NULL);
+		printf("ptscd_open() returned %d.\r\n", err);
+	}
+	
+
+	
 
 	err = lfs_unmount(&lfs);
 	if(err)
