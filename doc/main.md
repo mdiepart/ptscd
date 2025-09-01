@@ -23,7 +23,7 @@ The blob file is the main file of this standard. It must be named `ptscd.dat`. I
 
 #### Main header
 
-The main header starts with text `PTSCD` followed by the version in format `major.minor`(currently, `0.1`) followed by the part of the standard (`p1` for part 1 and `p2` for part 2).
+The main header starts with text `PTSCD` followed by a single space followed by the version in format `major.minor`(currently, `0.1`) followed by the part of the standard (`p1` for part 1 and `p2` for part 2) followed .
 
 The rest of the header depends on the part of the standard.
 
@@ -34,9 +34,8 @@ In case the part 1 is followed, the rest of the header contains a list of filena
  * channels
  * contacts
  * groups
- * users
 
-If any of those filenames is 0 lenght, this means that the codeplug does not contain any such entries. This also means that the radio will not be able to write to any of those files. So if the codeplug simply contains no such data but that the radio must be able to create such entries, the codeplug should contain an empty file and its name should be present in the list.
+If any of those filenames is 0 length, this means that the codeplug does not contain any such entries. This also means that the radio will not be able to write to any of those files. So if the codeplug simply contains no such data but that the radio must be able to create such entries, the codeplug should contain an empty file and its name should be present in the list.
 
 ##### Part 2
 
@@ -45,7 +44,6 @@ In case the part 2 of the standard is followed, the rest of the header contains 
  * channels
  * contacts
  * groups
- * users
 
 #### Content
 
@@ -135,4 +133,5 @@ CS-7000 Plus
 * Define the values to use for Squelch, power, ...
 * Does BCFM need to be split in EU/US BCFM?
 * Another way to handle modes would be to have a mode and submode field so that FM bandwidth / modulation factors can be classified as submodes of FM, it also make it easier to add subtly different modes like Reverse RTTY, reverse CW, or (let's be crazy) Codec2 Over DStar. The common denominator for mode would be that they use the same QA params and blob content. Otherwise it is another mode.
+    * Suggestion -> Merge QA Params and mode to a new 4B long Mode. 1B for mode, 4b for submode, 20b for QA Params
 * Define content of contact entry
